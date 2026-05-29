@@ -1,0 +1,194 @@
+---
+title: Modes
+description: Pick the animation an icon plays — the default draw, the icon's signature, or a custom factory.
+---
+
+import {
+  Bell,
+  Eye,
+  Heart,
+  Loader,
+  Star,
+  Sun,
+} from "lucide-motion";
+import { MotionIconConfig } from "lucide-motion";
+import { manifest } from "lucide-motion/manifest";
+import { CustomModeExample } from "@/components/docs/custom-mode-example";
+
+export const signedCount = manifest.filter((m) => m.hasSignature).length;
+
+The `mode` prop picks which animation the icon plays. By default every icon draws itself on. Switch to the icon's signature for a character-specific animation, or a function factory for full control.
+
+```tsx
+<Heart />                              // default — mode="draw"
+<Heart mode="signature" />             // heart-beat (per-icon signature)
+<Heart mode={(ctx) => ({ … })} />      // custom factory
+```
+
+`mode` composes with everything else — triggers, timing props, leave behavior, reduced motion, and `MotionIconConfig` defaults all keep working.
+
+---
+
+## The three categories
+
+| Category | Value | What it does |
+| -------- | ----- | ------------ |
+| Default | `"draw"` | Stroke-on animation (every icon's built-in default) |
+| Signature | `"signature"` | The icon's character animation. Falls back to `"draw"` for icons without one. |
+| Custom factory | `(ctx) => Variants` | A function that returns Motion variants — full control |
+
+The `variants` prop, if set, wins over `mode` and replaces the animation entirely. See [Custom motion](/docs/custom-motion).
+
+---
+
+## `"draw"` (default)
+
+The classic stroke-on animation. Each path draws itself on by animating `strokeDashoffset` from its measured length down to `0`, with strokes cascading by the `stagger` prop. At rest the dash sweep collapses to a plain solid stroke, so closed paths like the gear or heart render seam-free — matching how Lucide draws them (unlike Motion's `pathLength` shortcut, which leaves a hairline gap at the closure).
+
+<Preview>
+  <Heart size={48} />
+</Preview>
+
+```tsx
+<Heart />
+<Heart mode="draw" />  {/* equivalent */}
+```
+
+---
+
+## `"signature"` — per-icon animations
+
+Every icon can have a **signature** — a character-specific animation that matches what the icon *is*. A heart beats. A bell rings. A wheel spins like it's driving. Use `mode="signature"` to play the registered animation for that icon.
+
+<Preview wide>
+  <Heart size={48} mode="signature" />
+  <Bell size={48} mode="signature" />
+  <Eye size={48} mode="signature" />
+  <Star size={48} mode="signature" />
+  <Sun size={48} mode="signature" />
+  <Loader size={48} mode="signature" />
+</Preview>
+
+```tsx
+<Heart  mode="signature" />   {/* beats — lub-dub rhythm */}
+<Bell   mode="signature" />   {/* damped ring */}
+<Eye    mode="signature" />   {/* blink */}
+<Star   mode="signature" />   {/* twinkle */}
+<Sun    mode="signature" />   {/* slow rotation */}
+<Loader mode="signature" />   {/* infinite spin */}
+```
+
+Compare the default draw to the signature for the same icon:
+
+<Preview wide>
+  <Demo label='mode="draw"'><Heart size={56} /></Demo>
+  <Demo label='mode="signature"'><Heart size={56} mode="signature" /></Demo>
+</Preview>
+
+The draw cascades the stroke on. The signature is the icon's character motion — for a heart, that's the weighted lub-dub keyframes.
+
+### Fallback behavior
+
+Not every Lucide icon has a registered signature yet. When you set `mode="signature"` on an icon without one, the engine **silently falls back to `mode="draw"`** so nothing visibly breaks.
+
+In development, the engine also emits a one-time `console.warn` per icon so the gap is visible during local work:
+
+```
+[lucide-motion] mode="signature" used on icon "circle-arrow-up" with no signature registered. Falling back to mode="draw".
+```
+
+The warning is dead-code-eliminated in production via `process.env.NODE_ENV`.
+
+### Icons with signatures today
+
+**{signedCount.toLocaleString()}** of Lucide's {manifest.length.toLocaleString()} icons ship a bespoke signature today, with more added every release. Browse them in the [icon gallery](/) — switch the mode toggle to **Signature** and use **Show Only Signed** to filter to icons that have one.
+
+The fallback means you can set `mode="signature"` on *any* icon right now: icons with a signature play it, the rest draw on, and any icon that gains a signature later picks it up automatically with no code change. Each manifest entry also exposes a `hasSignature` boolean if you want to branch in your own UI (see [API reference](/docs/api#manifest)).
+
+---
+
+## Custom factory — `mode={(ctx) => Variants}`
+
+For full control, pass a factory function. It receives a `ModeContext` (timing + icon identity) and returns Motion variants.
+
+<Preview>
+  <CustomModeExample />
+</Preview>
+
+```tsx
+<Sparkles
+  mode={(ctx) => ({
+    rest:   { rotate: 0, scale: 1 },
+    active: {
+      rotate: [0, -15, 12, -8, 0],
+      scale:  [1, 1.1, 1],
+      transition: {
+        duration: ctx.duration,
+        delay: ctx.delay + ctx.index * ctx.stagger,
+        ease: ctx.easing,
+        repeat: ctx.repeat,
+      },
+    },
+  })}
+  duration={0.6}
+/>
+```
+
+`ModeContext` exposes the resolved timing context — `duration`, `delay`, `stagger`, `easing`, `repeat` — plus the identity of the element being animated: `iconName`, `index`, `pathTag`, `pathAttrs`, and the engine-measured `pathLength` (used by the draw mode to size its dash sweep). See [API reference](/docs/api#types).
+
+---
+
+## How `mode` composes with everything else
+
+The mode resolves once per render. All other engine behavior remains untouched:
+
+- **Triggers** — every mode still uses `"rest"` / `"active"` variants under the hood, so `hover`, `click`, `mount`, `in-view`, `parent-hover`, `manual` all work unchanged.
+- **Timing props** — `duration`, `delay`, `stagger`, `easing`, `repeat` flow into the mode's factory. Per-icon prop wins over context, context wins over mode-preferred defaults, which win over engine defaults.
+- **Leave behavior** — `onLeave="complete" / "snap" / "redraw"` still works.
+- **Reduced motion** — `reducedMotion="always"` suppresses the animation regardless of mode.
+- **`data-motion-state`** — fires the same way (`"drawing"` while the active variant is in flight, `"resting"` otherwise).
+- **`variants` prop** — still wins over `mode`. Use `variants` when you want to bypass the mode system entirely.
+
+### Mode-preferred defaults
+
+Each signature declares its own preferred timing. The `loader` signature defaults to infinite repeats; other signatures pick durations that match their physics. Per-icon props always override.
+
+```tsx
+<Loader mode="signature" />                         {/* infinite, 1s rotation */}
+<Loader mode="signature" duration={0.5} />          {/* faster, still infinite */}
+<Loader mode="signature" repeat={1} />              {/* one rotation */}
+```
+
+---
+
+## App-wide via `MotionIconConfig`
+
+Set a default mode for a whole subtree via the [config provider](/docs/defaults).
+
+<Preview wide>
+  <MotionIconConfig mode="signature" duration={0.6}>
+    <Heart size={48} />
+    <Star size={48} />
+    <Bell size={48} />
+  </MotionIconConfig>
+</Preview>
+
+```tsx
+<MotionIconConfig mode="signature" duration={0.6}>
+  <Heart />
+  <Star />
+  <Bell />
+</MotionIconConfig>
+```
+
+Per-icon `mode` props override the provider. Function-valued modes work too — pass the same factory reference through context to avoid breaking memoization.
+
+---
+
+## When to reach for each
+
+| Goal | Use |
+| ---- | --- |
+| Default draw-on motion | nothing — that's the default |
+| Match the icon's character (heart beats, bell rings, loader spins) | `mode="signature"` |
+| Something bespoke | `mode={(ctx) => ...}` or [`variants`](/docs/custom-motion) |

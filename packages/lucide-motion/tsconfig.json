@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src", "scripts", "vitest.setup.ts", "vitest.config.ts"],
+  "exclude": ["dist", "node_modules"]
+}

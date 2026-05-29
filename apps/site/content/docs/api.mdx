@@ -1,0 +1,211 @@
+---
+title: API reference
+description: Full prop reference for DrawIcon and MotionIconConfig.
+---
+
+## Icon components
+
+Every Lucide icon is exported as a React component:
+
+```tsx
+import { Heart, HeartIcon } from "lucide-motion";
+//        ^^^^^  ^^^^^^^^^
+//        Both names point to the same component.
+```
+
+Each icon accepts the props below. Generated icon files are thin wrappers around `<DrawIcon />` — the type for their props is `Omit<DrawIconProps, "nodes">` since `nodes` is supplied by the wrapper.
+
+---
+
+## `DrawIcon` props
+
+### Lucide-parity props
+
+| Prop                   | Type      | Default          | Notes                                                                |
+| ---------------------- | --------- | ---------------- | -------------------------------------------------------------------- |
+| `size`                 | `number`  | `24`             | Pixel size of the rendered SVG                                       |
+| `color`                | `string`  | `"currentColor"` | Stroke color (inherits parent CSS color by default)                  |
+| `strokeWidth`          | `number`  | `2`              | Line thickness                                                       |
+| `absoluteStrokeWidth`  | `boolean` | `false`          | Keep stroke pixel-constant regardless of `size`                      |
+| `className`, `style`   | —         | —                | Standard React attributes, spread onto the underlying `<svg>`        |
+| `onClick`, `aria-*`, `data-*` | — | —              | All standard SVG attributes are forwarded                            |
+| `ref`                  | `Ref<MotionIconHandle>` | — | Imperative handle (see [`trigger="manual"`](/docs/triggers#manual))   |
+
+### Timing props
+
+See [Animation](/docs/animation) for live demos.
+
+| Prop       | Type                | Default       | Notes                                  |
+| ---------- | ------------------- | ------------- | -------------------------------------- |
+| `duration` | `number`            | `0.55`        | Seconds per stroke                     |
+| `delay`    | `number`            | `0`           | Seconds before draw starts             |
+| `stagger`  | `number`            | `0.12`        | Per-stroke delay increment             |
+| `easing`   | `Easing` or `Easing[]` | `"easeInOut"` | Motion easing curve                  |
+| `repeat`   | `number`            | `0`           | Extra repetitions. `Infinity` = loop   |
+
+### Behavior props
+
+| Prop            | Type                            | Default       | Notes                                                                       |
+| --------------- | ------------------------------- | ------------- | --------------------------------------------------------------------------- |
+| `trigger`       | `Trigger`                       | `"hover"`     | When/how the animation fires. See [Triggers](/docs/triggers).               |
+| `onLeave`       | `OnLeave`                       | `"complete"`  | What happens when trigger ends. See [Leave behavior](/docs/leave-behavior). |
+| `reducedMotion` | `ReducedMotion`                 | `"system"`    | Respect / force / disable reduced-motion. See [Accessibility](/docs/accessibility). |
+| `mode`          | `ModeName` or `ModeFactory`     | `"draw"`      | Which animation to play. See [Modes](/docs/modes).                          |
+
+### Escape hatch
+
+| Prop       | Type                                          | Notes                                                                  |
+| ---------- | --------------------------------------------- | ---------------------------------------------------------------------- |
+| `variants` | `Variants` or `(i: number) => Variants`       | Bypass `mode` and supply Motion variants directly. See [Custom motion](/docs/custom-motion). |
+
+### DOM attributes the engine writes
+
+The rendered `<svg>` also carries an attribute that the engine owns. It is read-only from a consumer's perspective — passing it as a prop has no effect.
+
+| Attribute           | Values                                  | Notes                                                              |
+| ------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| `data-motion-state` | `"resting"` \| `"drawing"` | Whether the stroke draw is currently animating. See [Motion state](/docs/motion-state). |
+
+---
+
+## Type definitions
+
+```ts
+type Trigger =
+  | "hover"
+  | "click"
+  | "mount"
+  | "in-view"
+  | "parent-hover"
+  | "manual";
+
+type OnLeave = "complete" | "snap" | "redraw";
+
+type ReducedMotion = "system" | "always" | "never";
+
+type MotionState = "resting" | "drawing";
+
+type ModeName = "draw" | "signature";
+
+interface ModeContext {
+  iconName: string;
+  index: number;
+  pathTag: string;                     // "path" | "circle" | "rect" | "line" | …
+  pathAttrs: Record<string, string | number>; // the element's attrs (incl. `d`)
+  duration: number;
+  delay: number;
+  stagger: number;
+  easing: Easing | Easing[];
+  repeat: number;
+  pathLength: number;                  // engine-measured, from getTotalLength()
+}
+
+type ModeFactory = (ctx: ModeContext) => Variants;
+
+interface ModeDefaults {
+  duration?: number;
+  delay?: number;
+  stagger?: number;
+  easing?: Easing | Easing[];
+  repeat?: number;
+}
+
+interface Mode {
+  factory: ModeFactory;
+  defaults?: ModeDefaults;
+  needsTransformOrigin?: boolean;       // engine sets transform-origin on each child
+  transformOrigin?: string;             // override the pivot (default "12px 12px")
+}
+
+interface MotionIconHandle {
+  play: () => void;
+  reset: () => void;
+  node: SVGSVGElement | null;
+}
+
+type IconNode = [tag: string, attrs: Record<string, string | number>];
+```
+
+All exported from `lucide-motion`.
+
+---
+
+## `MotionIconConfig`
+
+React Context provider for app-wide defaults. See [App-wide defaults](/docs/defaults).
+
+```tsx
+interface MotionIconConfigValue {
+  size?: number;
+  color?: string;
+  strokeWidth?: number;
+  absoluteStrokeWidth?: boolean;
+  duration?: number;
+  delay?: number;
+  stagger?: number;
+  easing?: Easing | Easing[];
+  repeat?: number;
+  trigger?: Trigger;
+  onLeave?: OnLeave;
+  reducedMotion?: ReducedMotion;
+  mode?: ModeName | ModeFactory;
+}
+
+function MotionIconConfig(
+  props: MotionIconConfigValue & { children: ReactNode }
+): JSX.Element;
+```
+
+---
+
+## Other exports
+
+```ts
+import {
+  DrawIcon,            // The animated SVG primitive every icon wraps.
+  MotionIconConfig,    // Context provider for defaults.
+  PARENT_HOVER_ATTR,   // = "data-motion-icon-group"
+  type DrawIconProps,
+  type IconNode,
+  type Mode,
+  type ModeContext,
+  type ModeDefaults,
+  type ModeFactory,
+  type ModeName,
+  type MotionIconConfigValue,
+  type MotionIconHandle,
+  type MotionState,
+  type OnLeave,
+  type ReducedMotion,
+  type Trigger,
+} from "lucide-motion";
+```
+
+---
+
+## Manifest
+
+The package publishes a metadata list of every icon under the `lucide-motion/manifest` subpath. It's handy for building galleries, search, or your own "icons with signatures" filters — it carries no React/Motion code, just data.
+
+```ts
+import { manifest, type ManifestEntry } from "lucide-motion/manifest";
+
+interface ManifestEntry {
+  name: string;                 // lucide kebab name, e.g. "message-circle-dashed"
+  component: string;            // PascalCase export name, e.g. "MessageCircleDashed"
+  tags: readonly string[];      // lucide search/category tags
+  hasSignature: boolean;        // true if mode="signature" plays a bespoke animation
+                                // (false → it falls back to mode="draw")
+}
+
+const manifest: ManifestEntry[];
+```
+
+```tsx
+// Example: list only the icons that ship a bespoke signature.
+import { manifest } from "lucide-motion/manifest";
+
+const signed = manifest.filter((m) => m.hasSignature);
+```
+
+`hasSignature` is the same field the docs and gallery use to count and filter signed icons. Because it lives on the manifest, your filter stays correct automatically as signatures are added in future releases.

@@ -1,0 +1,21 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+# Centralized version management for deps shared across workspaces.
+# Update once here; bump pnpm-lock.yaml; every package picks it up.
+catalog:
+  react: 19.2.4
+  react-dom: 19.2.4
+  motion: ^12.38.0
+  "@types/react": ^19
+  "@types/react-dom": ^19
+  "@types/node": ^20
+  typescript: ^5
+
+# Explicitly allow postinstall scripts only for these packages.
+# Anything else gets skipped (pnpm's strict-by-default supply-chain stance).
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver

@@ -1,0 +1,87 @@
+{
+  "name": "lucide-motion",
+  "version": "0.4.0",
+  "description": "Lucide icons as animated React components, powered by Motion.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./manifest": {
+      "import": {
+        "types": "./dist/manifest.d.ts",
+        "default": "./dist/manifest.js"
+      },
+      "require": {
+        "types": "./dist/manifest.d.cts",
+        "default": "./dist/manifest.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "generate": "tsx scripts/generate.ts",
+    "prebuild": "pnpm generate",
+    "build": "BUILD=main tsup && BUILD=manifest tsup",
+    "predev": "pnpm generate",
+    "dev": "BUILD=manifest tsup --no-dts --no-clean && (BUILD=main tsup --watch --no-dts --no-clean & BUILD=manifest tsup --watch --no-dts --no-clean & wait)",
+    "clean": "rm -rf dist src/generated",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "status": "tsx scripts/signature-status.ts",
+    "lint": "echo \"(no lint configured)\""
+  },
+  "peerDependencies": {
+    "motion": ">=11",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "jsdom": "^29.1.1",
+    "lucide-static": "^1.16.0",
+    "motion": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "catalog:",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "lucide",
+    "icons",
+    "react",
+    "motion",
+    "framer-motion",
+    "animation",
+    "svg"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

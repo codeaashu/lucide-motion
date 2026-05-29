@@ -1,0 +1,21 @@
+{
+  "name": "lucide-motion-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=lucide-motion && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=18"
+  }
+}
