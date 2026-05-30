@@ -6,7 +6,6 @@
 
 [![npm version](https://img.shields.io/npm/v/lucide-motion.svg?style=flat-square)](https://www.npmjs.com/package/lucide-motion)
 [![license](https://img.shields.io/npm/l/lucide-motion.svg?style=flat-square)](./LICENSE)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/lucide-motion?style=flat-square)](https://bundlephobia.com/package/lucide-motion)
 [![types](https://img.shields.io/npm/types/lucide-motion?style=flat-square)](https://www.npmjs.com/package/lucide-motion)
 
 Every Lucide icon, animated. A drop-in replacement for [`lucide-react`](https://lucide.dev/guide/packages/lucide-react) with hover-to-draw motion, full prop parity, and a low-level escape hatch for custom variants. Powered by [Motion](https://motion.dev).
