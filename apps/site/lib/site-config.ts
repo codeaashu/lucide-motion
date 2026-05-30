@@ -6,7 +6,7 @@ export const siteConfig = {
   name: "Lucide Motion",
   description: `Animated React components for all ${ICON_COUNT.toLocaleString()} Lucide icons. Drop in lucide-motion for lucide-react and get hover, click, and imperative motion out of the box.`,
   url: "https://lucide-motion.aashuu.tech",
-  ogImage: "/og.png",
+  ogImage: "https://lucide-motion.aashuu.tech/Preview.png",
   keywords: [
     "lucide",
     "lucide motion",
